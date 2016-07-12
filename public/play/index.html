@@ -1,0 +1,192 @@
+<html lang="en-GB">
+<head>
+<meta name="description" content="Play Cards Against Humanity Online for free with BlackAndWhite.Cards">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Find a game - Black & White Cards</title>
+</head>
+<style>
+	* {
+		padding: 0;
+		margin: 0;
+	}
+	body {
+		font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+		font-size: 16px;
+		line-height: 1.4;
+	}
+	section {
+		max-width: 1090px;
+		display: inline-block;
+		transform: translate(-50%,-50%);
+		position: absolute;
+		top: 50%;
+		left: 50%;
+	}
+	.tabs {
+		margin-bottom: 20px;
+	}
+	input {
+		padding: 5px 10px;
+	}
+	.tabs input {
+		background-color: #009782;
+		color: white;
+		border: 0;
+		padding: 15px;
+		width: 50%;
+		border-right: 1px solid white;
+		font-size: 1.1em;
+		cursor: pointer;
+		transition: background-color .8s;
+	}
+	.tabs input:hover {
+		background-color: #007161;
+	}
+	.tab {
+		background-color: #DDDDDD;
+		padding: 10px;
+		min-height: 250px;
+	}
+	table {
+    	width: 100%;
+    	text-align: center;
+	}
+	#btn-refresh {
+		float: right;
+	}
+	h1 {
+		display: inline-block;
+	}
+	p {
+		margin-bottom: 5px;
+	}
+	td {
+		background-color: rgba(187, 187, 187, 0.53);
+	}
+	th, td {
+		padding: 2px 5px;
+	}
+	.left {
+		text-align: left;
+	}
+	tr#browserHead {
+		background-color: #009782;
+		color: white;
+	}
+	.tabs .current {
+		box-shadow: inset 0px -4px 0px 0px #FFF322;
+	}
+	label {
+		min-width: 120px;
+		display: inline-block;
+	}
+	input[type=checkbox] {
+		width: 18px;
+		height: 18px;
+	}
+	.cta {
+		border: 0;
+		background-color: #0DA70D;
+		color: white;
+		padding: 10px 15px;
+		cursor: pointer;
+		transition: background-color .8s;
+	}
+	.cta:hover {
+		background-color: #0A7D0A;
+	}
+</style>
+<body>
+<section>
+	<div class="tabs"><input type="button" value="Find a Game" class="current" onclick="switchTab(1)" id="tab1b"><input type="button" value="New Game" onclick="switchTab(2)" id="tab2b"></div>
+	<div id="tab1" class="tab">
+		<p><h1>Games currently in progress</h1><input id="btn-refresh" type="button" value="Refresh" onclick="getServers()"></p>
+		<p></p>
+		<p>The server browser can be used to find ongoing games which are available for you to join. These are games where the host has not set a password.</p>
+		<table>
+			<tbody id="gameBrowser">
+				<tr id="browserHead"><th class="left">Game Name</th><th>Players</th><th>Round</th></tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="tab2" class="tab">
+		<p><h1>Host a new game</h1></p>
+		<p>Once you create your new game you can send a link to your friends for them to join also. If you do not enter a password your game will show up on the game browser for anyone to join.</p>
+		<p><label>Set Password</label> <input id="passwordField" disabled="true"> (Currently Disabled)</p>
+		<p><label>Max Players</label> <input id="maxPlayersField" value="10" type="number"></p>
+		<p><label>Use idle timer</label> <input id="idleTimerField" type="checkbox" checked="true"></p>
+		<p><input type="button" value="Start New Game" onclick="newGame()" class="cta"></p>
+	</div>
+</section>
+
+<script src="/socket.io-1.4.3.js"></script>
+<script>
+	Object.prototype.forEach=function(c){for(var b=Object.keys(this),a=0;a<b.length;a++)c(this[b[a]])};
+	function switchTab(tab) {
+		["tab1","tab2"].forEach(function(id) {
+			document.getElementById(id).style.display = "none";
+			document.getElementById(id+"b").classList.remove("current");
+		});
+		document.getElementById("tab"+tab).style.display = "block";
+		document.getElementById("tab"+tab+"b").classList.add("current");
+	}
+	switchTab(1);
+
+	var socket = io();
+
+
+	function getServers() {
+		socket.emit('getServers',0);
+		document.getElementById("btn-refresh").value = "Fetching..."
+	}
+
+
+	function updateBrowser(data) {
+		var elem = document.getElementById("gameBrowser");
+		
+		var btn = document.getElementById("btn-refresh");
+		btn.value = "Update complete";
+		btn.disabled = true;
+
+
+		setTimeout(function() { document.getElementById("btn-refresh").value = "Refresh"; btn.disabled = false; }, 3000);
+
+		//Clear children
+		elem.children.forEach(function(child) { 
+			if (child.id !== "browserHead")
+				elem.removeChild(child);
+		});
+
+		if (!data || !data.length) {
+			var tableRow = document.createElement('tr');
+			tableRow.innerHTML = "No joinable games found.";
+			elem.appendChild(tableRow);
+			return;
+		}
+		
+		data.forEach(function(server) {
+			var tableRow = document.createElement('tr');
+			tableRow.innerHTML = "<td class='left'><a href='" +"/game/"+server.id +"'>" +server.host + "'s Game</a></td><td>" +server.playerCount  +"</td><td>" +server.round +"</td>";
+			elem.appendChild(tableRow);
+		});
+	}
+	socket.on('serverList',updateBrowser);
+
+	getServers();
+
+	function newGame() {
+		var pass = encodeURI(document.getElementById("passwordField").value);
+		var maxPlayers = document.getElementById("maxPlayersField").value;
+		var timeoutEnabled = document.getElementById("idleTimerField").value == "on" ? true : false;
+		window.location = "/game/new/" +pass +"/" +maxPlayers +"/" +timeoutEnabled;
+	}
+
+	function joinGame(gameID) {
+		window.location = "/game/"+gameID;
+	}
+
+	socket.on('joinGame',joinGame);
+</script>
+</body>
+</html>

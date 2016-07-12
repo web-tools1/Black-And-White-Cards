@@ -1,0 +1,59 @@
+<html lang="en-GB">
+<head>
+<meta name="description" content="Play Cards Against Humanity Online for free with BlackAndWhite.Cards">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>In Game - Black & White Cards</title>
+<link rel="stylesheet" href="/c.css">
+</head>
+<body>
+<div id="top">
+	<div id="popup-container"><div id="popup"><input type="button"></div></div>
+	<div id="stats-bar"><a href="/play/">Back to menu</a><span id="stats-text">Waiting for Server</span><div id="timeout"></div></div>
+	<div class="inner-top">
+		<div class="inner-top-left">
+			<div id="czar-card" class="blackCard card"><div class="card-inner">Welcome to Black And White Cards</div></div>
+		</div><div class="inner-top-right" id="playedCards">
+			<!--<div id="cardZ" class="card"><div class="card-inner">Living in a trashcan.</div></div>-->
+		</div>
+	</div>
+	<div class="inner-bottom">
+		<div id="inner-playercards" class="inner-playercards">
+			
+		</div>
+	</div>
+</div>
+<div id="bottom"><div class="half">
+		<div id="maxPlayers">10 Max</div>
+		<div id="playerCount" class="title" onclick='document.getElementById("bottom").style.display="none";document.getElementById("top").style.height="100%";document.getElementById("bottom-bar").style.display="block";updateUI();'>Players</div>
+		<ul id="playerList" class="bottom-content"></ul>
+	</div><div class="half">
+		<div class="title" onclick='document.getElementById("bottom").style.display="none";document.getElementById("top").style.height="100%";document.getElementById("bottom-bar").style.display="block";updateUI();'>Feed</div>
+		<div id="feed" class="bottom-content"></div>
+		<div class="chat"><input><input type="button" value="Send"></div>
+	</div>
+</div>
+<div id="bottom-bar" onclick='document.getElementById("bottom").style.display="block";document.getElementById("top").style.height="";document.getElementById("bottom-bar").style.display="none";updateUI();'>
+	<svg  version="1.1"
+		 width="145" height="37" viewBox="-0.6 -0.9 145 37" enable-background="new -0.6 -0.9 145 37" xml:space="preserve">
+	<path fill="#009782" d="M0,35.8c24,0,27.7-28,28.7-30.5c1.5-3,3.9-5.2,10.7-5.2H104c6.8,0,9.2,2.2,10.7,5.2
+		c1,2.5,4.7,30.5,28.7,30.5H0z"/>
+	<circle fill="#FFFFFF" cx="53.9" cy="17.6" r="13.9"/>
+	<polygon fill="#FFFFFF" points="107.4,25.6 92.4,10 77.5,25.6 "/>
+	<rect x="48.7" y="10.6" fill="none" width="28.3" height="20.7"/>
+	<text id="notifications" transform="matrix(1 0 0 1 48.708 23.4707)" fill="#009782" font-family="'ArialMT'" font-size="18">0</text>
+	</svg>
+</div>
+<div id="splash">
+	<div class="splash-inner">
+		<section id="stage1">
+			<p>Enter your name:</p>
+			<p><input id="name" placeholder="Your Name"><input type="button" onclick="setName()" value="Play >"></p>
+			<script>document.getElementById("name").value = localStorage.name || "";</script>
+		</section>
+	</div>
+</div>
+<script src="/socket.io-1.4.3.js"></script>
+<script src="/game.js"></script>
+</body>
+</html>
